@@ -1,4 +1,14 @@
-export const TodoFilter = () => (
+import { event } from "cypress/types/jquery";
+
+type Props = {
+  query: string;
+  onQueryChange: (query: string) => void;
+};
+
+export const TodoFilter: React.FC<Props> = ({
+  query,
+  onQueryChange,
+}) => (
   <form className="field has-addons">
     <p className="control">
       <span className="select">
@@ -16,6 +26,8 @@ export const TodoFilter = () => (
         type="text"
         className="input"
         placeholder="Search..."
+        value={query}
+        onChange={event => onQueryChange(event.target.value)}
       />
       <span className="icon is-left">
         <i className="fas fa-magnifying-glass" />
@@ -27,4 +39,4 @@ export const TodoFilter = () => (
       </span>
     </p>
   </form>
-);
+  );
