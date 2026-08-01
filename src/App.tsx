@@ -1,30 +1,62 @@
 /* eslint-disable max-len */
-import React from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import 'bulma/css/bulma.css';
 import '@fortawesome/fontawesome-free/css/all.css';
 
-import { TodoList } from './components/TodoList';
-import { TodoFilter } from './components/TodoFilter';
-import { TodoModal } from './components/TodoModal';
-import { Loader } from './components/Loader';
-import { useState, useEffect } from 'react';
-import { Todo } from './types/Todo';
 import { getTodos } from './api';
+import { Loader } from './components/Loader';
+import {
+  TodoFilter,
+  type Status,
+} from './components/TodoFilter';
+import { TodoList } from './components/TodoList';
+import { TodoModal } from './components/TodoModal';
+import { Todor } from './types/Todo';
 
 export const App: React.FC = () => {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [isLoading, setIsLoading] = useState(false);
+
   const [query, setQuery] = useState('');
+  const [status, setStatus] = useState<Status>('all');
+
+  const [selectedTodo, setSelectedTodo] = useState<Todo | null>(null);
 
   useEffect(() => {
     setIsLoading(true);
-    getTodos().then(loadedTodos => {
-      setTodos(loadedTodos);
-    })
+
+    getTodos()
+      .then(loadedTodos => {
+        setTodos(loadedTodos);
+      })
+      .catch(() => {
+        setTodos([]);
+      })
       .finally(() => {
-      setIsLoading(false);
-    });
+        setIsLoading(false);
+      });
   }, []);
+
+  const visibleTodos = useMemo(() => {
+    const normalizedQuery = query.trim().toLowerCase();
+
+    return todos.filter(todo => {
+      const matchesQuery = todo.title
+        .toLowerCase()
+        .includes(normalizedQuery);
+
+      const matchesStatus =
+        status === 'all'
+        || (status === 'active' && !todo.completed)
+        || (status === 'completed' && todo.completed);
+
+      return matchesQuery && matchesStatus;
+    });
+  }, [todos, query, status]);
+
+  const handleTodoSelect = (todo: Todo) => {
+    setSelectedTodo(todo);
+  };
 
   return (
     <>
@@ -35,20 +67,35 @@ export const App: React.FC = () => {
 
             <div className="block">
               <TodoFilter
-              query={query}
-              onQueryChange={setQuery}
+                query={query}
+                status={status}
+                onQueryChange={setQuery}
+                onStatusChange={setStatus}
+                onQueryClear={() => setQuery('')}
               />
             </div>
 
             <div className="block">
               {isLoading && <Loader />}
-              <TodoList todos={todos} />
+
+              {!isLoading && (
+                <TodoList
+                  todos={visibleTodos}
+                  selectedTodoId={selectedTodo?.id ?? null}
+                  onTodoSelect={handleTodoSelect}
+                />
+              )}
             </div>
           </div>
         </div>
       </div>
 
-      <TodoModal />
+      {selectedTodo && (
+        <TodoModal
+          todo={selectedTodo}
+          onClose={() => setSelectedTodo(null)}
+        />
+      )}
     </>
   );
 };
