@@ -3,15 +3,15 @@ import React, { useEffect, useMemo, useState } from 'react';
 import 'bulma/css/bulma.css';
 import '@fortawesome/fontawesome-free/css/all.css';
 
-import { getTodos } from './api';
-import { Loader } from './components/Loader';
+import { getTodos1 } from './api';
+import { Loader1 } from './components/Loader';
 import {
   TodoFilter,
   type Status,
 } from './components/TodoFilter';
-import { TodoList } from './components/TodoList';
-import { TodoModal } from './components/TodoModal';
-import { Todor } from './types/Todo';
+import { TodoList1 } from './components/TodoList';
+import { TodoModal1 } from './components/TodoModal';
+import { Todo1 } from './types/Todo';
 
 export const App: React.FC = () => {
   const [todos, setTodos] = useState<Todo[]>([]);
